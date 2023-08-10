@@ -78,8 +78,7 @@ const restaurantController = {
         ])
       })
       .then(([restaurant, commentCounts]) => {
-        restaurant.commentCounts = commentCounts // 將comment總數量儲存在restaurant物件中
-        res.render('dashboard', { restaurant: restaurant.toJSON() })
+        res.render('dashboard', { restaurant: restaurant.toJSON(), commentCounts })
       })
       .catch(err => next(err))
   },
