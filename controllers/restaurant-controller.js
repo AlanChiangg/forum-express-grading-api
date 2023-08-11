@@ -68,17 +68,24 @@ const restaurantController = {
   },
   getDashboard: (req, res, next) => {
     return Restaurant.findByPk(req.params.id, {
-      include: [Category, Comment]
+      include: [Category, Comment],
+      attributes: {
+        include: [
+          [sequelize.literal('(SELECT COUNT(*) FROM Favorites WHERE Favorites.restaurant_id = Restaurant.id)'), 'favoritedCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Comments WHERE Comments.restaurant_id = Restaurant.id)'), 'commentCount']
+        ]
+      },
+      raw: true
     })
       .then(restaurant => {
         if (!restaurant) throw new Error('Restaurant didn\'t exist!')
-        return Promise.all([
+        const commentCount = restaurant.commentCount
+        const favoritedCount = restaurant.favoritedCount
+        res.render('dashboard', {
           restaurant,
-          Comment.count({ where: { restaurantId: restaurant.id } }) // 計算comment的總數量
-        ])
-      })
-      .then(([restaurant, commentCounts]) => {
-        res.render('dashboard', { restaurant: restaurant.toJSON(), commentCounts })
+          commentCount,
+          favoritedCount
+        })
       })
       .catch(err => next(err))
   },
