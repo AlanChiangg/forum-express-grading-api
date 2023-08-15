@@ -2,7 +2,7 @@ const { Restaurant, Category } = require('../models')
 const { getOffset, getPagination } = require('../helpers/pagination-helper')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 
-const adminController = {
+const adminServices = {
   getRestaurants: (req, cb) => {
     const DEFAULT_LIMIT = 10
     const categoryId = Number(req.query.categoryId) || ''
@@ -59,4 +59,4 @@ const adminController = {
   }
 }
 
-module.exports = adminController
+module.exports = adminServices
