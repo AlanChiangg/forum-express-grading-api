@@ -4,14 +4,23 @@ const adminController = {
   getRestaurants: (req, res, next) => {
     adminServices.getRestaurants(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
   },
+  createRestaurant: (req, res, next) => {
+    adminServices.postRestaurant(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
+  },
   postRestaurant: (req, res, next) => {
+    adminServices.postRestaurant(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
+  },
+  getRestaurant: (req, res, next) => {
+    adminServices.getRestaurant(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
+  },
+  editRestaurant: (req, res, next) => {
+    adminServices.editRestaurant(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
+  },
+  putRestaurant: (req, res, next) => {
     adminServices.postRestaurant(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
   },
   deleteRestaurant: (req, res, next) => {
     adminServices.deleteRestaurant(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
-  },
-  getRestaurant: (req, res, next) => {
-    adminServices.getRestaurant(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
   }
 }
 

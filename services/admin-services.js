@@ -31,6 +31,13 @@ const adminServices = {
       }))
       .catch(err => cb(err))
   },
+  createRestaurant: (req, cb) => {
+    return Category.findAll({
+      raw: true
+    })
+      .then(categories => cb(null, { categories }))
+      .catch(err => cb(err))
+  },
   postRestaurant: (req, cb) => {
     const { name, tel, address, openingHours, description, categoryId } = req.body
     if (!name) throw new Error('Restaurant name is required!')
@@ -57,6 +64,42 @@ const adminServices = {
       .then(restaurant => {
         if (!restaurant) throw new Error("Restaurant didn't exist!")
         cb(null, { restaurant })
+      })
+      .catch(err => cb(err))
+  },
+  editRestaurant: (req, cb) => {
+    return Promise.all([
+      Restaurant.findByPk(req.params.id, { raw: true }),
+      Category.findAll({ raw: true })
+    ])
+      .then(([restaurant, categories]) => {
+        if (!restaurant) throw new Error("Restaurant didn't exist!")
+        cb(null, { restaurant, categories })
+      })
+      .catch(err => cb(err))
+  },
+  putRestaurant: (req, cb) => {
+    const { name, tel, address, openingHours, description, categoryId } = req.body
+    if (!name) throw new Error('Restaurant name is required!')
+    const { file } = req
+    Promise.all([
+      Restaurant.findByPk(req.params.id),
+      imgurFileHandler(file)
+    ])
+      .then(([restaurant, filePath]) => {
+        if (!restaurant) throw new Error("Restaurant didn't exist!")
+        return restaurant.update({
+          name,
+          tel,
+          address,
+          openingHours,
+          description,
+          image: filePath || restaurant.image,
+          categoryId
+        })
+      })
+      .then(editedRestaurant => {
+        cb(null, { restaurant: editedRestaurant })
       })
       .catch(err => cb(err))
   },
