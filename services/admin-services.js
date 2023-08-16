@@ -112,6 +112,13 @@ const adminServices = {
       .then(deletedRestaurant => cb(null, { restaurant: deletedRestaurant }))
       .catch(err => cb(err))
   },
+  getUsers: (req, cb) => {
+    return User.findAll({
+      raw: true
+    })
+      .then(users => cb(null, { users }))
+      .catch(err => cb(err))
+  },
   patchUser: (req, cb) => {
     return User.findByPk(req.params.id)
       .then(user => {
