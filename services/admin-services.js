@@ -1,4 +1,4 @@
-const { Restaurant, Category } = require('../models')
+const { Restaurant, Category, User } = require('../models')
 const { getOffset, getPagination } = require('../helpers/pagination-helper')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 
@@ -110,6 +110,22 @@ const adminServices = {
         return restaurant.destroy()
       })
       .then(deletedRestaurant => cb(null, { restaurant: deletedRestaurant }))
+      .catch(err => cb(err))
+  },
+  patchUser: (req, cb) => {
+    return User.findByPk(req.params.id)
+      .then(user => {
+        if (!user) throw new Error("User didn't exist!")
+        if (user.email === 'root@example.com') {
+          return cb(null, false)
+        }
+        return user.update({
+          isAdmin: !user.isAdmin
+        })
+      })
+      .then(pachedUser => {
+        cb(null, { pachedUser })
+      })
       .catch(err => cb(err))
   }
 }

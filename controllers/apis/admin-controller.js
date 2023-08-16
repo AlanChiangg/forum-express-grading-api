@@ -21,6 +21,21 @@ const adminController = {
   },
   deleteRestaurant: (req, res, next) => {
     adminServices.deleteRestaurant(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
+  },
+  patchUser: (req, res, next) => {
+    adminServices.patchUser(req, (err, data) => {
+      if (err) return next(err)
+      if (data.toString() === 'false') {
+        return res.json({
+          status: 'error',
+          messages: '禁止變更 root 權限'
+        })
+      }
+      return res.json({
+        status: 'success',
+        messages: '使用者權限變更成功'
+      })
+    })
   }
 }
 
