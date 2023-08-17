@@ -27,6 +27,12 @@ const userController = {
       res.json({ status: 'success', data: userData })
     })
   },
+  addLike: (req, res, next) => {
+    userServices.addLike(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
+  },
+  removeLike: (req, res, next) => {
+    userServices.removeLike(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
+  },
   addFollowing: (req, res, next) => {
     userServices.addFollowing(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
   },

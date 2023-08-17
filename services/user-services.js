@@ -1,4 +1,4 @@
-const { User, Followship } = require('../models')
+const { User, Followship, Like, Restaurant } = require('../models')
 const bcrypt = require('bcryptjs')
 
 const userServices = {
@@ -19,6 +19,44 @@ const userServices = {
         req.flash('success_message', '成功註冊帳號！')
         cb(null, newUser)
       })
+      .catch(err => cb(err))
+  },
+  addLike: (req, cb) => {
+    const { restaurantId } = req.params
+    return Promise.all([
+      Restaurant.findByPk(restaurantId),
+      Like.findOne({
+        where: {
+          userId: req.user.id,
+          restaurantId
+        }
+      })
+    ])
+      .then(([restaurant, like]) => {
+        if (!restaurant) throw new Error("Restaurant didn't exist!")
+        if (like) throw new Error('You have liked this restaurant!')
+
+        return Like.create({
+          userId: req.user.id,
+          restaurantId
+        })
+      })
+      .then(Liked => cb(null, Liked))
+      .catch(err => cb(err))
+  },
+  removeLike: (req, cb) => {
+    return Like.findOne({
+      where: {
+        userId: req.user.id,
+        restaurantId: req.params.restaurantId
+      }
+    })
+      .then(like => {
+        if (!like) throw new Error("You haven't unliked this restaurant!")
+
+        return like.destroy()
+      })
+      .then(removedLike => cb(null, removedLike))
       .catch(err => cb(err))
   },
   addFollowing: (req, cb) => {
