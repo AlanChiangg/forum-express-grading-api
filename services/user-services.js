@@ -1,5 +1,6 @@
-const { User, Followship, Like, Restaurant, Favorite } = require('../models')
+const { User, Followship, Like, Restaurant, Favorite, Comment } = require('../models')
 const bcrypt = require('bcryptjs')
+const { imgurFileHandler } = require('../helpers/file-helpers')
 
 const userServices = {
   signUp: (req, cb) => {
@@ -18,6 +19,80 @@ const userServices = {
       .then(newUser => {
         req.flash('success_message', '成功註冊帳號！')
         cb(null, newUser)
+      })
+      .catch(err => cb(err))
+  },
+  getUser: (req, cb) => {
+    return Promise.all([
+      User.findByPk(req.params.id, {
+        include: [
+          { model: User, as: 'Followers' },
+          { model: User, as: 'Followings' },
+          { model: Restaurant, as: 'FavoritedRestaurants' }
+        ],
+        nest: true
+      }),
+      Comment.findAll({
+        raw: true,
+        nest: true,
+        where: { userId: req.params.id },
+        include: Restaurant
+      })
+    ])
+      .then(([user, comments]) => {
+        if (!user) throw new Error('User didn\'t exist!')
+        const loginUser = req.user.id
+        const result = user.toJSON()
+        cb(null, {
+          user: result,
+          loginUser,
+          comments
+        })
+      })
+      .catch(err => cb(err))
+  },
+  editUser: (req, cb) => {
+    return User.findByPk(req.params.id, {
+      raw: true
+    })
+      .then(user => {
+        if (!user) throw new Error('User didn\'t exist!')
+        cb(null, { user })
+      })
+      .catch(err => cb(err))
+  },
+  putUser: (req, cb) => {
+    const { name } = req.body
+    if (!name) throw new Error('User name is required!')
+    if (req.user.id !== Number(req.params.id)) throw new Error('User can only edit him or her own profile!')
+    const { file } = req
+    return Promise.all([
+      User.findByPk(req.params.id),
+      imgurFileHandler(file)
+    ])
+      .then(([user, filePath]) => {
+        if (!user) throw new Error('User didn\'t exist!')
+        return user.update({
+          name,
+          image: filePath || user.image
+        })
+      })
+      .then(puttedUser => cb(null, { user: puttedUser.toJSON() }))
+      .catch(err => cb(err))
+  },
+  getTopUsers: (req, cb) => {
+    return User.findAll({
+      include: [{ model: User, as: 'Followers' }]
+    })
+      .then(users => {
+        const result = users
+          .map(user => ({
+            ...user.toJSON(),
+            followerCount: user.Followers.length,
+            isFollowed: req.user.Followings.some(f => f.id === user.id)
+          }))
+          .sort((a, b) => b.followerCount - a.followerCount)
+        cb(null, { users: result })
       })
       .catch(err => cb(err))
   },
