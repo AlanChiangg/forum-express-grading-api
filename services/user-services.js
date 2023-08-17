@@ -1,4 +1,4 @@
-const { User } = require('../models')
+const { User, Followship } = require('../models')
 const bcrypt = require('bcryptjs')
 
 const userServices = {
@@ -19,6 +19,42 @@ const userServices = {
         req.flash('success_message', '成功註冊帳號！')
         cb(null, newUser)
       })
+      .catch(err => cb(err))
+  },
+  addFollowing: (req, cb) => {
+    const { userId } = req.params
+    Promise.all([
+      User.findByPk(userId),
+      Followship.findOne({
+        where: {
+          followerId: req.user.id,
+          followingId: req.params.userId
+        }
+      })
+    ])
+      .then(([user, followship]) => {
+        if (!user) throw new Error("User didn't exist!")
+        if (followship) throw new Error('You are already following this user!')
+        return Followship.create({
+          followerId: req.user.id,
+          followingId: userId
+        })
+      })
+      .then(newFollowed => cb(null, newFollowed))
+      .catch(err => cb(err))
+  },
+  removeFollowing: (req, cb) => {
+    Followship.findOne({
+      where: {
+        followerId: req.user.id,
+        followingId: req.params.userId
+      }
+    })
+      .then(followship => {
+        if (!followship) throw new Error("You haven't followed this user!")
+        return followship.destroy()
+      })
+      .then(removeFollowed => cb(null, removeFollowed))
       .catch(err => cb(err))
   }
 }

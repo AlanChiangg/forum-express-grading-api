@@ -26,6 +26,12 @@ const userController = {
       delete userData.password
       res.json({ status: 'success', data: userData })
     })
+  },
+  addFollowing: (req, res, next) => {
+    userServices.addFollowing(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
+  },
+  removeFollowing: (req, res, next) => {
+    userServices.removeFollowing(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
   }
 }
 
