@@ -1,4 +1,6 @@
 const jwt = require('jsonwebtoken')
+const userServices = require('../../services/user-services')
+
 const userController = {
   signIn: (req, res, next) => {
     try {
@@ -15,6 +17,16 @@ const userController = {
     } catch (err) {
       next(err)
     }
+  },
+  signUp: (req, res, next) => {
+    userServices.signUp(req, (err, data) => {
+      if (err) return next(err)
+      console.log(data)
+      const userData = data.toJSON()
+      delete userData.password
+      res.json({ status: 'success', data: userData })
+    })
   }
 }
+
 module.exports = userController
